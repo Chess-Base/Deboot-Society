@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy - DEBoot</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG"></script>
+</head>
+<body class="light-theme">
+  <div class="sidebar closed">
+    <h2>DEBoot</h2>
+    <a href="index.html"><i class="fas fa-home"></i> Home</a>
+    <a href="chat.html"><i class="fas fa-comment"></i> Chat</a>
+    <a href="privacy.html" class="active"><i class="fas fa-shield-alt"></i> Privacy</a>
+    <a href="#" class="settings-toggle"><i class="fas fa-cog"></i> Settings <i class="fas fa-chevron-down"></i></a>
+    <div class="settings-menu">
+      <a href="#" onclick="toggleTheme()"><i class="fas fa-adjust"></i> Toggle Theme</a>
+      <a href="#" onclick="clearChat()"><i class="fas fa-trash"></i> Clear Chat</a>
+      <a href="#" onclick="exportChat()"><i class="fas fa-download"></i> Export Chat</a>
+      <a href="#" onclick="refreshChat()"><i class="fas fa-sync"></i> Refresh</a>
+    </div>
+  </div>
+  
+  <div class="page-container full-width">
+    <section class="privacy-policy">
+      <header>
+        <button class="sidebar-toggle" aria-label="Toggle Sidebar"><i class="fas fa-bars"></i></button>
+        <h1>Privacy Policy</h1>
+        <select id="themeSelect" onchange="changeTheme(this.value)" aria-label="Select theme">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="blue">Blue</option>
+          <option value="green">Green</option>
+        </select>
+      </header>
+      <p><strong>Last Updated:</strong> March 8, 2025</p>
+      <p>Welcome to DEBoot! We prioritize your privacy and are committed to protecting your data. This policy outlines how we handle your information.</p>
+      
+      <h2>1. Data Collection</h2>
+      <p>We collect only what’s necessary:</p>
+      <ul>
+        <li><strong>Chat History:</strong> Stored locally in your browser using localStorage for a seamless experience.</li>
+        <li><strong>No Personal Info:</strong> We do not collect personal information unless you voluntarily provide it within chat messages or uploaded files.</li>
+      </ul>
+
+      <h2>2. Data Usage</h2>
+      <p>Your data enhances your experience:</p>
+      <ul>
+        <li><strong>Context:</strong> Used to maintain coherent conversations by referencing past interactions.</li>
+        <li><strong>No Sharing:</strong> We do not sell, share, or transfer your data to third parties.</li>
+      </ul>
+
+      <h2>3. Data Storage</h2>
+      <p>Your data stays on your device:</p>
+      <ul>
+        <li><strong>Local:</strong> Stored in your browser’s localStorage for accessibility across sessions.</li>
+        <li><strong>Cloud:</strong> Optional backups may occur if you use Puter’s cloud services, governed by their privacy terms.</li>
+      </ul>
+
+      <h2>4. File Uploads</h2>
+      <p>When you upload files:</p>
+      <ul>
+        <li><strong>Processing:</strong> Files (text, PDFs, images) are processed locally or via Puter’s API for analysis.</li>
+        <li><strong>Temporary Storage:</strong> Image files may be temporarily stored in PutWANer’s cloud for AI vision processing, then deleted.</li>
+      </ul>
+
+      <h2>5. Contact Us</h2>
+      <p>If you have questions about this policy, reach out to us:</p>
+      <p>Email: <a href="mailto:redythacker@gmail.com">redythacker@gmail.com</a></p>
+    </section>
+  </div>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'925d7544a8f753ab',t:'MTc0Mjg5NTc0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
