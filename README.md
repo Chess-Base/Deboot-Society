@@ -27,7 +27,7 @@ DEBoot isn’t just a chatbot—it’s your trusty sidekick for quick answers, d
 DEBoot’s got the goods:
 
 - **Real-Time Chat** 💬: Smart, context-aware talks with top AI models.
-- **File Upload & Analysis** 📤: Crunch text files (up to 10MB).
+- **File Upload & Analysis** 📤: Crunch text or code files (up to 10MB).
 - **Math Mode** ➗: Flip on LaTeX for gorgeous math formulas.
 - **Multi-Model Fun** 🧩: Choose OpenAI o3-mini, GPT-4o, GPT-4.5, or Perplexity LLaMA 3.1.
 - **Code Highlighting** 💾: Slick code formatting with Prism.js for JS, Python, HTML, CSS.
