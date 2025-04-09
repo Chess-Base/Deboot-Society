@@ -1,89 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DEBoot - Your AI Companion</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DEBoot - Chat with Ease</title>
+  <link rel="stylesheet" href="styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG"></script>
 </head>
-<body class="landing-page light-theme">
+<body class="landing-page dark-theme">
   <header class="landing-header">
     <div class="logo">DEBoot</div>
     <nav>
       <a href="chat.html"><i class="fas fa-comment"></i> Chat</a>
       <a href="privacy.html"><i class="fas fa-shield-alt"></i> Privacy</a>
       <a href="#features"><i class="fas fa-star"></i> Features</a>
-      <select id="themeSelect" onchange="changeTheme(this.value)" aria-label="Select theme">
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-        <option value="blue">Blue</option>
-        <option value="green">Green</option>
-      </select>
     </nav>
   </header>
-  
-  <section class="landing-hero">
-    <h1>DEBoot: Your Professional AI Companion</h1>
-    <p>Experience advanced AI with a privacy-first approach and seamless, intuitive interaction.</p>
-    <div>
-      <a href="chat.html" class="btn">Start Chatting Now</a>
-      <a href="#features" class="btn secondary">Explore Features</a>
+  <main class="landing-main">
+    <h1>Welcome to DEBoot</h1>
+    <p>Your friendly AI chatbot for seamless conversations.</p>
+    <a href="chat.html" class="cta-btn">Start Chatting</a>
+  </main>
+  <section id="features">
+    <h2>Features</h2>
+    <div class="feature-grid">
+      <div class="feature-item"><i class="fas fa-comment"></i> Real-time Chat</div>
+      <div class="feature-item"><i class="fas fa-shield-alt"></i> Privacy First</div>
+      <div class="feature-item"><i class="fas fa-file-upload"></i> File Uploads</div>
     </div>
   </section>
-
-  <section class="features-section" id="features">
-    <h2>Explore DEBoot’s Capabilities</h2>
-    <div class="features-grid">
-      <div class="feature-item">
-        <i class="fas fa-brain"></i>
-        <h3>Multi-Model AI</h3>
-        <p>Access a variety of cutting-edge AI models tailored to your needs.</p>
-      </div>
-      <div class="feature-item">
-        <i class="fas fa-lock"></i>
-        <h3>Privacy First</h3>
-        <p>Your conversations stay local, ensuring разведкаmaximum security.</p>
-      </div>
-      <div class="feature-item">
-        <i class="fas fa-robot"></i>
-        <h3>AI-Powered Answers</h3>
-        <p>Receive advanced, precise responses, including math solutions.</p>
-      </div>
-      <div class="feature-item">
-        <i class="fas fa-sliders-h"></i>
-        <h3>Custom Experience</h3>
-        <p>Switch themes, export chats, and personalize your interaction.</p>
-      </div>
-      <div class="feature-item">
-        <i class="fas fa-square-root-alt"></i>
-        <h3>Math Support</h3>
-        <p>Get readable math answers with LaTeX rendering.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="faq-section">
-    <h2>Frequently Asked Questions</h2>
-    <div class="faq-item">
-      <h3>How secure is DEBoot?</h3>
-      <p>All data is stored locally on your device, with no server-side tracking.</p>
-    </div>
-    <div class="faq-item">
-      <h3>Which AI models are available?</h3>
-      <p>Choose from Grok, DeepSeek, Gemma, Meta Llama, Claude, and more.</p>
-    </div>
-    <div class="faq-item">
-      <h3>Can it solve math problems?</h3>
-      <p>Yes, DEBoot supports math queries with readable LaTeX-rendered answers.</p>
-    </div>
-  </section>
-
   <footer class="landing-footer">
-    <p>© 2025 DEBoot. Built with ❤️ by Deboot Society. All rights reserved.</p>
+    <p>© 2025 DEBoot by DEBoot Society. All rights reserved.</p>
   </footer>
   <script src="script.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'925d7544af8cbcb6',t:'MTc0Mjg5NTc0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
