@@ -75,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
 let documentParagraphs = [];
 let chatHistory = [];
 let mathMode = false;
+let pendingFiles = [];
 
 function loadChatHistory() {
   const chatbox = document.getElementById("chatbox");
@@ -126,24 +127,24 @@ function removeMarkdown(text) {
   text = text.replace(/\*\*(.*?)\*\*/g, '$1');
   text = text.replace(/\*(.*?)\*/g, '$1');
   text = text.replace(/^#+\s*(.*)/gm, '$1');
-  text = text.replace(/\[(.*?)\]\(.*?\)/g, '$1');
-  text = text.replace(/!\[.*?\]\(.*?\)/g, '');
+  text = text.replace(/$$ (.*?) $$$$ .*? $$/g, '$1');
+  text = text.replace(/!$$ .*? $$$$ .*? $$/g, '');
   text = text.replace(/^>\s*(.*)/gm, '$1');
   text = text.replace(/^\s*([-*_]){3,}\s*$/gm, '');
   return text;
 }
 
-function formatResponse(text) {
+function formatResponse(text, isCodeContent = false, codeLanguage = 'text') {
   // Replace LaTeX delimiters for MathJax
-  text = text.replace(/\$\$(.*?)\$\$/g, '\\[$1\\]');
-  text = text.replace(/\$(.*?)\$/g, '\\($1\\)');
+  text = text.replace(/\$\$(.*?)\$\$/g, '\$$ $1\ $$');
+  text = text.replace(/\$(.*?)\$/g, '\$$ $1\ $$');
 
   const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
   let html = '<div class="message-content">';
   let lastIndex = 0;
   let match;
 
-  // Process code blocks first
+  // Process explicit code blocks
   while ((match = codeBlockRegex.exec(text)) !== null) {
     const beforeText = text.slice(lastIndex, match.index).trim();
     if (beforeText) {
@@ -155,10 +156,15 @@ function formatResponse(text) {
     lastIndex = codeBlockRegex.lastIndex;
   }
 
-  // Handle remaining text after the last code block (or all text if no code blocks)
+  // Handle remaining text
   const remainingText = text.slice(lastIndex).trim();
   if (remainingText) {
-    html += formatTextAsList(remainingText);
+    if (isCodeContent) {
+      // If the content is from a code file, wrap it in a code block
+      html += `<pre><code class="language-${codeLanguage}">${escapeHtml(remainingText)}</code></pre>`;
+    } else {
+      html += formatTextAsList(remainingText);
+    }
   }
 
   html += '</div>';
@@ -166,33 +172,29 @@ function formatResponse(text) {
 }
 
 function formatTextAsList(text) {
-  // Split text into paragraphs (double newline)
   const paragraphs = text.split(/\n\n+/).filter(p => p.trim() !== '');
   let html = '';
 
   for (const paragraph of paragraphs) {
     const lines = paragraph.split('\n').filter(line => line.trim() !== '');
-    // Check if the paragraph looks like a numbered list
     const isNumberedList = lines.every(line => /^\d+\.\s/.test(line.trim()));
-    // Check if the paragraph looks like a bulleted list
     const isBulletedList = lines.every(line => /^[-*]\s/.test(line.trim()));
 
     if (isNumberedList) {
       html += '<ol>';
       for (const line of lines) {
-        const cleanLine = line.replace(/^\d+\.\s/, '').trim(); // Remove "1. ", "2. ", etc.
+        const cleanLine = line.replace(/^\d+\.\s/, '').trim();
         html += `<li>${escapeHtml(removeMarkdown(cleanLine))}</li>`;
       }
       html += '</ol>';
     } else if (isBulletedList) {
       html += '<ul>';
       for (const line of lines) {
-        const cleanLine = line.replace(/^[-*]\s/, '').trim(); // Remove "- " or "* "
+        const cleanLine = line.replace(/^[-*]\s/, '').trim();
         html += `<li>${escapeHtml(removeMarkdown(cleanLine))}</li>`;
       }
       html += '</ul>';
     } else {
-      // Treat as plain paragraph
       const cleanText = removeMarkdown(paragraph.trim());
       html += `<p>${escapeHtml(cleanText)}</p>`;
     }
@@ -201,7 +203,7 @@ function formatTextAsList(text) {
   return html;
 }
 
-function appendMessage(sender, message, model = null, note = null) {
+function appendMessage(sender, message, model = null, note = null, isCodeContent = false, codeLanguage = 'text') {
   const chatbox = document.getElementById("chatbox");
   if (!chatbox) return;
   const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -231,7 +233,7 @@ function appendMessage(sender, message, model = null, note = null) {
   const contentDiv = document.createElement('div');
   contentDiv.className = 'message-content';
   if (sender === 'bot' && typeof message === 'string') {
-    contentDiv.innerHTML = formatResponse(message);
+    contentDiv.innerHTML = formatResponse(message, isCodeContent, codeLanguage);
   } else {
     const p = document.createElement('p');
     p.textContent = message;
@@ -260,6 +262,55 @@ function appendMessage(sender, message, model = null, note = null) {
   
   chatHistory.push({ sender, message, model, timestamp: new Date().toISOString() });
   saveChatHistory();
+}
+
+function appendPendingFile(file, fileUrl = null) {
+  const chatbox = document.getElementById("chatbox");
+  if (!chatbox) return;
+
+  const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'message user pending';
+
+  const headerDiv = document.createElement('div');
+  headerDiv.className = 'message-header';
+  const avatarSpan = document.createElement('span');
+  avatarSpan.className = 'avatar';
+  avatarSpan.textContent = 'U';
+  headerDiv.appendChild(avatarSpan);
+  const timestampSpan = document.createElement('span');
+  timestampSpan.className = 'timestamp';
+  timestampSpan.textContent = timestamp;
+  headerDiv.appendChild(timestampSpan);
+  messageDiv.appendChild(headerDiv);
+
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'message-content';
+  const fileInfo = document.createElement('p');
+  fileInfo.textContent = `Pending file: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+  contentDiv.appendChild(fileInfo);
+
+  if (file.type.startsWith('image') && fileUrl) {
+    const img = document.createElement('img');
+    img.src = fileUrl;
+    img.alt = `Preview of ${file.name}`;
+    img.style.maxWidth = '200px';
+    contentDiv.appendChild(img);
+  }
+
+  const cancelButton = document.createElement('button');
+  cancelButton.className = 'cancel-pending';
+  cancelButton.textContent = 'Cancel';
+  cancelButton.onclick = () => {
+    pendingFiles = pendingFiles.filter(f => f !== file);
+    messageDiv.remove();
+    showNotification(`File ${file.name} removed.`, 'success');
+  };
+  contentDiv.appendChild(cancelButton);
+
+  messageDiv.appendChild(contentDiv);
+  chatbox.appendChild(messageDiv);
+  chatbox.scrollTop = chatbox.scrollHeight;
 }
 
 function showNotification(message, type = 'success') {
@@ -317,59 +368,17 @@ async function handleFileUpload(event) {
     return;
   }
 
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    const fileName = file.name;
-    const fileType = file.type;
-    appendMessage("user", `Uploaded file: ${fileName}`);
-
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     if (file.size > MAX_FILE_SIZE) {
-      appendMessage("bot", "File is too large to process (max 10MB). Please upload a smaller file.");
-      showNotification("File exceeds size limit.", "error");
+      showNotification(`File ${file.name} is too large (max 10MB).`, "error");
       continue;
     }
-
-    try {
-      if (fileType.startsWith("text") || fileType === "application/json") {
-        const text = await file.text();
-        documentParagraphs = text.split(/\n\n+/).filter(p => p.trim() !== '');
-        if (documentParagraphs.length > 0) {
-          const summaryText = documentParagraphs.slice(0, 5).join('\n\n');
-          const summaryPrompt = `Please provide a professional summary of the following text content from "${fileName}":\n\n${summaryText}\n\nNote: This is only the beginning of the document. Use code blocks for code snippets only.`;
-          appendMessage("bot", `Text file "${fileName}" uploaded and split into ${documentParagraphs.length} paragraphs. Generating summary...`);
-          const model = document.getElementById("modelSelect").value;
-          let resp = await sendMessageWithRetry(summaryPrompt, model);
-          let fullResponse = "";
-          const messageDiv = document.querySelector('#chatbox .message:last-child');
-          for await (const part of resp) {
-            if (part?.text) {
-              fullResponse += part.text;
-              messageDiv.innerHTML = formatResponse(fullResponse);
-              chatbox.scrollTop = chatbox.scrollHeight;
-            }
-          }
-          chatHistory[chatHistory.length - 1].message = fullResponse;
-          saveChatHistory();
-        } else {
-          appendMessage("bot", "The uploaded text file is empty.");
-        }
-      } else if (fileType === "application/pdf") {
-        appendMessage("bot", "PDF file detected. Extracting text requires server-side processing, which I’ll simulate.");
-        const text = await simulatePdfTextExtraction(file);
-        await sendFileAnalysis(fileName, text);
-      } else if (fileType.startsWith("image")) {
-        const imageUrl = URL.createObjectURL(file);
-        appendMessage("bot", `Image file detected. Preview:\n<img src="${imageUrl}" alt="Uploaded Image" style="max-width: 300px;" />`);
-        await sendFileAnalysis(fileName, null, imageUrl);
-      } else {
-        appendMessage("bot", "Unsupported file type. Please upload text, PDF, or image files.");
-      }
-    } catch (error) {
-      console.error("File processing error:", error);
-      appendMessage("bot", `Error processing file: ${error.message}`);
-      showNotification("Failed to process file.", "error");
-    }
+    pendingFiles.push(file);
+    const fileUrl = file.type.startsWith('image') ? URL.createObjectURL(file) : null;
+    appendPendingFile(file, fileUrl);
+    showNotification(`File ${file.name} uploaded and pending prompt.`, "success");
   }
 }
 
@@ -379,44 +388,46 @@ async function simulatePdfTextExtraction(file) {
   });
 }
 
-async function sendFileAnalysis(fileName, textContent = null, imageUrl = null) {
-  const modelSelect = document.getElementById("modelSelect");
-  if (!modelSelect) return;
-  let model = modelSelect.value;
-
-  const context = getChatContext();
-  let prompt;
-
-  if (imageUrl) {
-    prompt = `${context}\nYou: Analyze the image from file "${fileName}".\nDEBoot, please provide a professional analysis of this image.`;
-  } else if (textContent) {
-    prompt = `${context}\nYou: Analyze the following text file content from "${fileName}":\n\n${textContent}\n\nDEBoot, please provide a professional analysis of this text content. Use code blocks for code snippets only.`;
-  } else {
-    throw new Error("Either textContent or imageUrl must be provided.");
-  }
+async function processFileContent(file) {
+  const fileType = file.type;
+  const fileName = file.name.toLowerCase();
+  // Define code-related file extensions
+  const codeExtensions = {
+    '.py': 'python',
+    '.js': 'javascript',
+    '.html': 'html',
+    '.css': 'css',
+    '.json': 'json',
+    '.java': 'java',
+    '.cpp': 'cpp',
+    '.c': 'c',
+    '.cs': 'csharp',
+    '.php': 'php',
+    '.rb': 'ruby',
+    '.go': 'go',
+    '.ts': 'typescript',
+    '.sql': 'sql',
+    '.sh': 'bash'
+  };
+  const isCodeFile = Object.keys(codeExtensions).some(ext => fileName.endsWith(ext));
+  const codeLanguage = isCodeFile ? codeExtensions[Object.keys(codeExtensions).find(ext => fileName.endsWith(ext))] : 'text';
 
   try {
-    appendMessage("bot", "Analyzing file content...", model);
-    let resp = imageUrl ? await puter.ai.chat(prompt, imageUrl, { model, stream: true }) : await sendMessageWithRetry(prompt, model);
-    let fullResponse = "";
-    const messageDiv = document.querySelector('#chatbox .message:last-child');
-    for await (const part of resp) {
-      if (part?.text) {
-        fullResponse += part.text;
-        messageDiv.innerHTML = formatResponse(fullResponse);
-        if (typeof Prism !== 'undefined') {
-          const codeBlocks = messageDiv.querySelectorAll('code[class^="language-"]');
-          codeBlocks.forEach(block => Prism.highlightElement(block));
-        }
-        chatbox.scrollTop = chatbox.scrollHeight;
-      }
+    if (fileType.startsWith("text") || fileType === "application/json") {
+      const text = await file.text();
+      return { type: 'text', content: text, isCode: isCodeFile, language: codeLanguage };
+    } else if (fileType === "application/pdf") {
+      const text = await simulatePdfTextExtraction(file);
+      return { type: 'pdf', content: text, isCode: false, language: 'text' };
+    } else if (fileType.startsWith("image")) {
+      const imageUrl = URL.createObjectURL(file);
+      return { type: 'image', content: imageUrl, isCode: false, language: 'text' };
+    } else {
+      throw new Error("Unsupported file type.");
     }
-    chatHistory[chatHistory.length - 1].message = fullResponse;
-    saveChatHistory();
   } catch (error) {
-    console.error("File Analysis Error:", error);
-    appendMessage("bot", `Error analyzing file: ${error.message || "An unexpected issue occurred."}`, model);
-    showNotification("File analysis failed.", "error");
+    console.error("File processing error:", error);
+    throw error;
   }
 }
 
@@ -430,28 +441,62 @@ async function sendMessage() {
   }
 
   const userText = inputElem.value.trim();
-  if (!userText) return;
+  if (!userText && pendingFiles.length === 0) return;
 
-  appendMessage("user", userText);
+  if (userText) {
+    appendMessage("user", userText);
+  }
   inputElem.value = "";
   inputElem.style.height = 'auto';
 
   let model = modelSelect.value;
+  let prompt = getChatContext();
 
-  const context = getChatContext();
-  const queryType = classifyQuery(userText);
-  let prompt = `${context}\nYou: ${userText}\nDEBoot, respond in a professional tone with clear, concise answers. Use code blocks for code snippets only.`;
+  // Handle pending files
+  let fileContents = [];
+  if (pendingFiles.length > 0) {
+    for (const file of pendingFiles) {
+      try {
+        const fileContent = await processFileContent(file);
+        fileContents.push({ fileName: file.name, ...fileContent });
+      } catch (error) {
+        appendMessage("bot", `Error processing file ${file.name}: ${error.message}`);
+        showNotification(`Failed to process ${file.name}.`, "error");
+      }
+    }
+    // Remove pending file messages from chatbox
+    document.querySelectorAll('.message.pending').forEach(div => div.remove());
+  }
+
+  // Build the prompt
+  if (fileContents.length > 0) {
+    prompt += "\nYou uploaded the following files:\n";
+    for (const fc of fileContents) {
+      if (fc.type === 'image') {
+        prompt += `- ${fc.fileName} (image): [Image data provided separately]\n`;
+      } else {
+        const contentPrefix = fc.isCode ? `\`\`\`${fc.language}\n` : '';
+        const contentSuffix = fc.isCode ? '\n```' : '';
+        prompt += `- ${fc.fileName} (${fc.type}${fc.isCode ? ', code' : ''}):\n${contentPrefix}${fc.content}${contentSuffix}\n\n`;
+      }
+    }
+  }
+  if (userText) {
+    prompt += `\nYou: ${userText}`;
+  }
+  prompt += `\nDEBoot, respond in a professional tone with clear, concise answers. For code-related content, always use appropriate code blocks (e.g., \`\`\`python for Python code).`;
   if (mathMode) {
     prompt += "\nEnsure all mathematical expressions are formatted in LaTeX for readability.";
   }
   if (documentParagraphs.length > 0) {
-    const relevantParagraphs = findRelevantParagraphs(userText, documentParagraphs);
+    const relevantParagraphs = findRelevantParagraphs(userText || '', documentParagraphs);
     if (relevantParagraphs.length > 0) {
       prompt = `Based on the following document content:\n${relevantParagraphs.join('\n\n')}\n\n${prompt}`;
     }
   }
 
-  const isCodeRequest = /html|code|generate.*(html|code|script)/i.test(userText);
+  const isCodeRequest = userText && /html|code|generate.*(html|code|script)/i.test(userText);
+  const isCodeResponse = fileContents.some(fc => fc.isCode);
 
   const placeholderDiv = document.createElement('div');
   placeholderDiv.className = 'message bot placeholder';
@@ -465,9 +510,16 @@ async function sendMessage() {
   chatbox.scrollTop = chatbox.scrollHeight;
 
   try {
-    let resp = await sendMessageWithRetry(prompt, model);
+    let resp;
+    if (fileContents.some(fc => fc.type === 'image')) {
+      const imageUrls = fileContents.filter(fc => fc.type === 'image').map(fc => fc.content);
+      resp = await puter.ai.chat(prompt, imageUrls.length > 0 ? imageUrls : null, { model, stream: true });
+    } else {
+      resp = await sendMessageWithRetry(prompt, model);
+    }
     let fullResponse = "";
     let botMessageDiv = null;
+    let codeLanguage = isCodeResponse ? fileContents.find(fc => fc.isCode)?.language || 'text' : 'text';
     for await (const part of resp) {
       if (part?.text) {
         if (!botMessageDiv) {
@@ -483,7 +535,7 @@ async function sendMessage() {
           botMessageDiv = placeholderDiv.querySelector('.message-content');
         }
         fullResponse += part.text;
-        botMessageDiv.innerHTML = isCodeRequest ? `<pre><code class="language-text">${escapeHtml(fullResponse)}</code></pre>` : formatResponse(fullResponse);
+        botMessageDiv.innerHTML = isCodeRequest || isCodeResponse ? formatResponse(fullResponse, true, codeLanguage) : formatResponse(fullResponse);
         if (typeof Prism !== 'undefined') {
           const codeBlocks = botMessageDiv.querySelectorAll('code[class^="language-"]');
           codeBlocks.forEach(block => Prism.highlightElement(block));
@@ -496,6 +548,7 @@ async function sendMessage() {
     }
     chatHistory[chatHistory.length - 1].message = fullResponse;
     saveChatHistory();
+    pendingFiles = [];
   } catch (error) {
     console.error("Chat Error:", error);
     placeholderDiv.innerHTML = `<p>Error: ${error.message || "An unexpected issue occurred."} Please try again.</p>`;
@@ -522,6 +575,7 @@ function clearChat() {
     chatbox.innerHTML = "";
     chatHistory = [];
     documentParagraphs = [];
+    pendingFiles = [];
     localStorage.removeItem("debootChatHistory");
     localStorage.removeItem("debootChatContext");
     appendMessage("bot", "Chat history cleared. How may I assist you now?");
