@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEBoot Chat</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" />
+  <script src="https://js.puter.com/v2/"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG"></script>
+</head>
+<body class="dark-theme">
+  <div class="sidebar closed">
+    <h2>DEBoot</h2>
+    <a href="index.html"><i class="fas fa-home"></i> Home</a>
+    <a href="chat.html" class="active"><i class="fas fa-comment"></i> New Chat</a>
+    <a href="privacy.html"><i class="fas fa-shield-alt"></i> Privacy</a>
+    <a href="javascript:void(0)" onclick="clearChat()"><i class="fas fa-trash"></i> Clear Chat</a>
+  </div>
+  
+  <div class="page-container full-width">
+    <div class="chat-container">
+      <header>
+        <button class="sidebar-toggle" aria-label="Toggle Sidebar"><i class="fas fa-bars"></i></button>
+        <h1>DEBoot Chat</h1>
+        <div class="model-toggle">
+          <select id="modelSelect" aria-label="Select model">
+            <option value="o3-mini">OpenAI o3-mini</option>
+            <option value="openrouter:openai/gpt-4o-search-preview">Web Search🌐</option>
+            <option value="openrouter:openai/gpt-4.5-preview">OpenAI GPT-4.5 Preview</option>
+            <option value="openrouter:perplexity/llama-3.1-sonar-small-128k-online">Perplexity LLaMA 3.1 Sonar Online</option>
+          </select>
+        </div>
+      </header>
+      <div id="chatbox"></div>
+      <div class="input-area">
+        <input type="file" id="fileInput" style="display: none;" accept=".txt,.pdf,.jpg,.jpeg,.png" multiple />
+        <button class="input-btn" onclick="document.getElementById('fileInput').click();" aria-label="Upload file"><i class="fas fa-paperclip"></i></button>
+        <textarea id="userInput" placeholder="Type your message or upload a file..." rows="1" autocomplete="off" aria-label="Message input"></textarea>
+        <button onclick="sendMessage()" aria-label="Send message"><i class="fas fa-paper-plane"></i> Send</button>
+        <button id="mathModeToggle" onclick="toggleMathMode()" aria-label="Toggle math mode"><i class="fas fa-square-root-alt"></i> Math Mode</button>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+  <script src="animations.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-markup.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-css.min.js"></script>
+  <!-- Cloudflare script remains unchanged -->
+</body>
+</html>
